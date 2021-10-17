@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BackEnd.DTOs;
 using BackEnd.Entities;
+using BackEnd.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,9 +25,11 @@ namespace BackEnd.Controllers
             this.mapper = mapper;
         }
         [HttpGet]
-        public async Task<ActionResult<List<GenreDTO>>> Get()
+        public async Task<ActionResult<List<GenreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            var genres = await context.Genres.ToListAsync();
+            var queryable = context.Genres.AsQueryable();
+            await HttpContext.InsertParametersPaginationHeader(queryable);
+            var genres = await queryable.OrderBy(x => x.Name).Paginate(paginationDTO).ToListAsync();
             return mapper.Map<List<GenreDTO>>(genres);
         }
 

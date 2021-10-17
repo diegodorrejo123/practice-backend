@@ -38,7 +38,8 @@ namespace BackEnd
                 var frontUrl = Configuration.GetValue<string>("AllowedHosts");
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder.WithOrigins(frontUrl).AllowAnyMethod().AllowAnyHeader();
+                    builder.WithOrigins(frontUrl).AllowAnyMethod().AllowAnyHeader()
+                    .WithExposedHeaders(new string[] { "totalAmountOfRecords" });
                 });
             });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

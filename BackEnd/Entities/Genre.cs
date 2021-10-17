@@ -10,7 +10,7 @@ namespace BackEnd.Entities
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "El campo {0} es requerido")]
-        [StringLength(maximumLength: 10)]
+        [StringLength(maximumLength: 50)]
         public string Name { get; set; }
     }
 }

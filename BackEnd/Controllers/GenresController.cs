@@ -1,6 +1,9 @@
-﻿using BackEnd.Entities;
+﻿using AutoMapper;
+using BackEnd.DTOs;
+using BackEnd.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +15,19 @@ namespace BackEnd.Controllers
     [ApiController]
     public class GenresController : ControllerBase
     {
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
 
-        public GenresController()
+        public GenresController(ApplicationDbContext context, IMapper mapper)
         {
+            this.context = context;
+            this.mapper = mapper;
         }
         [HttpGet]
-        public ActionResult<List<Genre>> Get()
+        public async Task<ActionResult<List<GenreDTO>>> Get()
         {
-            return new List<Genre>() { new Genre() { Id = 1, Name = "Comedy" } };
+            var genres = await context.Genres.ToListAsync();
+            return mapper.Map<List<GenreDTO>>(genres);
         }
 
         [HttpGet("{Id:int}")]
@@ -30,9 +38,12 @@ namespace BackEnd.Controllers
 
 
         [HttpPost]
-        public ActionResult Post([FromBody] Genre genre)
+        public async Task<ActionResult> Post([FromBody] GenreCreateDTO genreCreateDTO)
         {
-            throw new NotImplementedException();
+            var genre = mapper.Map<Genre>(genreCreateDTO);
+            context.Add(genre);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
         [HttpPut]
         public ActionResult Put([FromBody] Genre genre)

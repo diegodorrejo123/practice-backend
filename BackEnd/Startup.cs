@@ -29,9 +29,10 @@ namespace BackEnd
         {
             services.AddCors(options =>
             {
+                var frontUrl = Configuration.GetValue<string>("AllowedHosts");
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader();
+                    builder.WithOrigins(frontUrl).AllowAnyMethod().AllowAnyHeader();
                 });
             });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

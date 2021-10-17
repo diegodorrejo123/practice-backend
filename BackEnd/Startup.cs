@@ -1,3 +1,4 @@
+using BackEnd.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,6 +28,7 @@ namespace BackEnd
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddTransient<IRepository, RepositoryInMemory>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

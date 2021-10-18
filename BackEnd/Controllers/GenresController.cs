@@ -33,7 +33,6 @@ namespace BackEnd.Controllers
             this.userManager = userManager;
         }
         [HttpGet]
-        [AllowAnonymous]
         public async Task<ActionResult<List<GenreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
             var queryable = context.Genres.AsQueryable();
@@ -43,7 +42,6 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("{Id:int}")]
-        [AllowAnonymous]
         public async Task<ActionResult<GenreDTO>> Get(int Id)
         {
             var genre = await context.Genres.FindAsync(Id);

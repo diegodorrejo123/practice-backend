@@ -52,6 +52,9 @@ namespace BackEnd
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+
+
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -65,6 +68,11 @@ namespace BackEnd
                         ),
                     ClockSkew = TimeSpan.Zero
                 });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("isAdmin", policy => policy.RequireClaim("role", "admin"));
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

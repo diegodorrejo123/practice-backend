@@ -2,7 +2,10 @@
 using BackEnd.DTOs;
 using BackEnd.Entities;
 using BackEnd.Utility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,17 +17,23 @@ namespace BackEnd.Controllers
 {
     [Route("api/genres")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GenresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
+        private readonly UserManager<IdentityUser> userManager;
 
-        public GenresController(ApplicationDbContext context, IMapper mapper)
+        public GenresController(ApplicationDbContext context, 
+            IMapper mapper, 
+            UserManager<IdentityUser> userManager)
         {
             this.context = context;
             this.mapper = mapper;
+            this.userManager = userManager;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<GenreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
             var queryable = context.Genres.AsQueryable();
@@ -34,6 +43,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("{Id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<GenreDTO>> Get(int Id)
         {
             var genre = await context.Genres.FindAsync(Id);

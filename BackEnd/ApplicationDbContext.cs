@@ -20,5 +20,7 @@ namespace BackEnd
         }
 
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<Author> Authors { get; set; }
+        public DbSet<Cinema> Cinemas { get; set; }
     }
 }

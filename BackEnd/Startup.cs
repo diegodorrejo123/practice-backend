@@ -1,3 +1,5 @@
+using AutoMapper;
+using BackEnd.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,6 +13,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -33,11 +37,27 @@ namespace BackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IFileStocker, LocalFileStocker>();
+            services.AddHttpContextAccessor();
+
             services.AddAutoMapper(typeof(Startup));
+            services.AddSingleton(provider =>
+                new MapperConfiguration(config =>
+                {
+                    var geometryFactory = provider.GetRequiredService<GeometryFactory>();
+                    config.AddProfile(new AutoMapperProfiles(geometryFactory));
+                }).CreateMapper());
+
+            services.AddSingleton<GeometryFactory>(NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326));
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("defaultConnection"));
+                options.UseSqlServer(Configuration.GetConnectionString("defaultConnection"),
+                    sqlServer => sqlServer.UseNetTopologySuite());
             });
+
+
+
             services.AddCors(options =>
             {
                 var frontUrl = Configuration.GetValue<string>("AllowedHosts");
@@ -92,7 +112,7 @@ namespace BackEnd
             }
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseCors();
             app.UseAuthentication();

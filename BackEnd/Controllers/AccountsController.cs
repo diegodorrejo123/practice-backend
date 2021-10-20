@@ -52,9 +52,9 @@ namespace BackEnd.Controllers
             return mapper.Map<List<UserDTO>>(users);
         }
 
-        [HttpPost("updateToAdmin")]
+        [HttpPost("addAdmin")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
-        public async Task<ActionResult> UpdateToAdmin([FromBody]string userId)
+        public async Task<ActionResult> addAdmin([FromBody]string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
             await userManager.AddClaimAsync(user, new Claim("role", "admin"));

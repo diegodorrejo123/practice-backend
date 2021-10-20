@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using BackEnd.DTOs;
 using BackEnd.Entities;
+using BackEnd.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +25,24 @@ namespace BackEnd.Controllers
             this.mapper = mapper;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<List<CinemaDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
+        {
+            var queryable = context.Cinemas.AsQueryable();
+            await HttpContext.InsertParametersPaginationHeader(queryable);
+            var cinemas = await queryable.OrderBy(x => x.Name).Paginate(paginationDTO).ToListAsync();
+            return mapper.Map<List<CinemaDTO>>(cinemas);
+        }
+
+
+        [HttpGet("{Id:int}")]
+        public async Task<ActionResult<CinemaDTO>> Get(int Id)
+        {
+            var cinemas = await context.Cinemas.FindAsync(Id);
+            if (cinemas == null) { return NotFound(); }
+            return mapper.Map<CinemaDTO>(cinemas);
+        }
+
         [HttpPost]
         public async Task<ActionResult> Post([FromBody]CinemaCreateDTO cinemaCreateDTO)
         {
@@ -32,6 +52,27 @@ namespace BackEnd.Controllers
             return NoContent();
         }
 
+
+        [HttpPut("{Id:int}")]
+        public async Task<ActionResult> Put(int Id, [FromBody] CinemaCreateDTO cinemaCreateDTO)
+        {
+            var cinema = await context.Cinemas.FindAsync(Id);
+            if (cinema == null) { return NotFound(); }
+            cinema = mapper.Map(cinemaCreateDTO, cinema);
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
+
+
+        [HttpDelete("{Id:int}")]
+        public async Task<ActionResult> Delete(int Id)
+        {
+            var exists = await context.Cinemas.AnyAsync(x => x.Id == Id);
+            if (!exists) { return NotFound(); }
+            context.Remove(new Cinema() { Id = Id });
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
 
 
     }

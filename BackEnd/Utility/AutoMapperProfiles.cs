@@ -24,6 +24,10 @@ namespace BackEnd.Utility
             CreateMap<CinemaCreateDTO, Cinema>()
                 .ForMember(x => x.Location, x => x.MapFrom(dto =>
                 geometryFactory.CreatePoint(new Coordinate(dto.Longitude, dto.Latitude))));
+
+            CreateMap<Cinema, CinemaDTO>()
+                .ForMember(x => x.Latitude, dto => dto.MapFrom(field => field.Location.Y))
+                .ForMember(x => x.Longitude, dto => dto.MapFrom(field => field.Location.X));
         }
     }
 }

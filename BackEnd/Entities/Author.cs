@@ -15,5 +15,6 @@ namespace BackEnd.Entities
         public string Biography { get; set; }
         public DateTime BirthDay { get; set; }
         public string Photo { get; set; }
+        public List<MovieAuthors> MovieAuthors { get; set; }
     }
 }

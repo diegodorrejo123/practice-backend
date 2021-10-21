@@ -17,7 +17,7 @@ namespace BackEnd.Controllers
 {
     [Route("api/genres")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GenresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -33,6 +33,7 @@ namespace BackEnd.Controllers
             this.userManager = userManager;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<GenreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
             var queryable = context.Genres.AsQueryable();
@@ -49,8 +50,16 @@ namespace BackEnd.Controllers
             return mapper.Map<GenreDTO>(genre);
         }
 
+        [HttpGet("all")]
+        public async Task<ActionResult<List<GenreDTO>>> GetAll()
+        {
+            var genres = await context.Genres.ToListAsync();
+            return mapper.Map<List<GenreDTO>>(genres);
+        }
+
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult> Post([FromBody] GenreCreateDTO genreCreateDTO)
         {
             var genre = mapper.Map<Genre>(genreCreateDTO);

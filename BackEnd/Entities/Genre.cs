@@ -12,5 +12,6 @@ namespace BackEnd.Entities
         [Required(ErrorMessage = "El campo {0} es requerido")]
         [StringLength(maximumLength: 50)]
         public string Name { get; set; }
+        public List<MovieGenres> MovieGenres { get; set; }
     }
 }

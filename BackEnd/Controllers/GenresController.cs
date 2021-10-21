@@ -1,6 +1,13 @@
-﻿using BackEnd.Entities;
+﻿using AutoMapper;
+using BackEnd.DTOs;
+using BackEnd.Entities;
+using BackEnd.Utility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,37 +19,74 @@ namespace BackEnd.Controllers
     [ApiController]
     public class GenresController : ControllerBase
     {
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
+        private readonly UserManager<IdentityUser> userManager;
 
-        public GenresController()
+        public GenresController(ApplicationDbContext context, 
+            IMapper mapper, 
+            UserManager<IdentityUser> userManager)
         {
+            this.context = context;
+            this.mapper = mapper;
+            this.userManager = userManager;
         }
         [HttpGet]
-        public ActionResult<List<Genre>> Get()
+        [AllowAnonymous]
+        public async Task<ActionResult<List<GenreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            return new List<Genre>() { new Genre() { Id = 1, Name = "Comedy" } };
+            var queryable = context.Genres.AsQueryable();
+            await HttpContext.InsertParametersPaginationHeader(queryable);
+            var genres = await queryable.OrderBy(x => x.Name).Paginate(paginationDTO).ToListAsync();
+            return mapper.Map<List<GenreDTO>>(genres);
         }
 
         [HttpGet("{Id:int}")]
-        public async Task<ActionResult<Genre>> Get(int Id)
+        [AllowAnonymous]
+        public async Task<ActionResult<GenreDTO>> Get(int Id)
         {
-            throw new NotImplementedException();
+            var genre = await context.Genres.FindAsync(Id);
+            if(genre == null) { return NotFound(); }
+            return mapper.Map<GenreDTO>(genre);
+        }
+
+        [HttpGet("all")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<GenreDTO>>> GetAll()
+        {
+            var genres = await context.Genres.ToListAsync();
+            return mapper.Map<List<GenreDTO>>(genres);
         }
 
 
         [HttpPost]
-        public ActionResult Post([FromBody] Genre genre)
+        [AllowAnonymous]
+        public async Task<ActionResult> Post([FromBody] GenreCreateDTO genreCreateDTO)
         {
-            throw new NotImplementedException();
+            var genre = mapper.Map<Genre>(genreCreateDTO);
+            context.Add(genre);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
-        [HttpPut]
-        public ActionResult Put([FromBody] Genre genre)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
+        [HttpPut("{Id:int}")]
+        public async Task<ActionResult> Put(int Id, [FromBody] GenreCreateDTO genreCreateDTO)
         {
-            throw new NotImplementedException();
+            var genre = await context.Genres.FindAsync(Id);
+            if (genre == null) { return NotFound(); }
+            genre = mapper.Map(genreCreateDTO, genre);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
-        [HttpDelete]
-        public ActionResult Delete()
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
+        [HttpDelete("{Id:int}")]
+        public async Task<ActionResult> Delete(int Id)
         {
-            throw new NotImplementedException();
+            var exists = await context.Genres.AnyAsync(x => x.Id == Id);
+            if (!exists) { return NotFound(); }
+            context.Remove(new Genre() { Id = Id });
+            await context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

@@ -4,14 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BackEnd.Entities
+namespace BackEnd.DTOs
 {
-    public class Genre
+    public class GenreCreateDTO
     {
-        public int Id { get; set; }
-        [Required(ErrorMessage = "El campo {0} es requerido")]
+        [Required]
         [StringLength(maximumLength: 50)]
         public string Name { get; set; }
-        public List<MovieGenres> MovieGenres { get; set; }
     }
 }

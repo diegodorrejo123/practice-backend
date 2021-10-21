@@ -2,6 +2,8 @@
 using BackEnd.DTOs;
 using BackEnd.Entities;
 using BackEnd.Utility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +28,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<CinemaDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
             var queryable = context.Cinemas.AsQueryable();
@@ -36,6 +39,7 @@ namespace BackEnd.Controllers
 
 
         [HttpGet("{Id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<CinemaDTO>> Get(int Id)
         {
             var cinemas = await context.Cinemas.FindAsync(Id);
@@ -43,6 +47,7 @@ namespace BackEnd.Controllers
             return mapper.Map<CinemaDTO>(cinemas);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpPost]
         public async Task<ActionResult> Post([FromBody]CinemaCreateDTO cinemaCreateDTO)
         {
@@ -53,6 +58,7 @@ namespace BackEnd.Controllers
         }
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpPut("{Id:int}")]
         public async Task<ActionResult> Put(int Id, [FromBody] CinemaCreateDTO cinemaCreateDTO)
         {
@@ -64,6 +70,7 @@ namespace BackEnd.Controllers
         }
 
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpDelete("{Id:int}")]
         public async Task<ActionResult> Delete(int Id)
         {

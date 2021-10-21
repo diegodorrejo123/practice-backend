@@ -2,6 +2,8 @@
 using BackEnd.DTOs;
 using BackEnd.Entities;
 using BackEnd.Utility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +31,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("postget")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Policy = "isAdmin")]
         public async Task<ActionResult<MoviesPostGetDTO>> PostGet()
         {
             var cinemas = await context.Cinemas.ToListAsync();
@@ -40,6 +43,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpPost("searchAuthorsByName")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         public async Task<ActionResult<List<MovieAuthorDTO>>> SearchByName([FromBody]string Name)
         {
             if (string.IsNullOrWhiteSpace(Name)) { return new List<MovieAuthorDTO>(); }
@@ -50,6 +54,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<LandingPageDTO>> Get()
         {
             var top = 111;
@@ -75,6 +80,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("putGet/{Id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         public async Task<ActionResult<MoviesPutGetDTO>> PutGet(int Id)
         {
             var movieResult = await Get(Id);
@@ -107,6 +113,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpPut("{Id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         public async Task<ActionResult> Put(int Id, [FromForm] MovieCreateDTO movieCreateDTO)
         {
             var movie = await context.Movies
@@ -135,6 +142,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("filter")]
+        [AllowAnonymous]
 
         public async Task<ActionResult<List<MovieDTO>>> filter([FromQuery] MovieFilterDTO movieFilterDTO)
         {
@@ -166,6 +174,7 @@ namespace BackEnd.Controllers
 
 
         [HttpGet("{Id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<MovieDTO>> Get(int Id)
         {
             var movie = await context.Movies
@@ -181,6 +190,7 @@ namespace BackEnd.Controllers
         }
             
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         public async Task<ActionResult<int>> Post([FromForm]MovieCreateDTO movieCreateDTO)
         {
             var movie = mapper.Map<Movie>(movieCreateDTO);
@@ -200,6 +210,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpDelete("{Id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         public async Task<ActionResult> Delete(int Id)
         {
             var movie = await context.Movies.FirstOrDefaultAsync(x => x.Id == Id);

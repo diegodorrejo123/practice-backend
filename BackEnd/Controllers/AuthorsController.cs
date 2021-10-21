@@ -2,6 +2,8 @@
 using BackEnd.DTOs;
 using BackEnd.Entities;
 using BackEnd.Utility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<AuthorDTO>>> Get([FromQuery]PaginationDTO paginationDTO)
         {
             var queryable = context.Authors.AsQueryable();
@@ -38,6 +41,7 @@ namespace BackEnd.Controllers
             return mapper.Map<List<AuthorDTO>>(authors);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpPost]
         public async Task<ActionResult> Post([FromForm]AuthorCreateDTO authorCreateDTO)
         {
@@ -53,12 +57,14 @@ namespace BackEnd.Controllers
 
 
         [HttpGet("{Id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<AuthorDTO>> Get(int Id)
         {
             var author = await context.Authors.FindAsync(Id);
             if (author == null) { return NotFound(); }
             return mapper.Map<AuthorDTO>(author);
         }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpPut("{Id:int}")]
         public async Task<ActionResult> Put(int Id, [FromForm] AuthorCreateDTO authorCreateDTO)
         {
@@ -73,6 +79,7 @@ namespace BackEnd.Controllers
             return NoContent();
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpDelete("{Id:int}")]
         public async Task<ActionResult> Delete(int Id)
         {

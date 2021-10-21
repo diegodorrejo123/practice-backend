@@ -43,6 +43,7 @@ namespace BackEnd.Controllers
             this.mapper = mapper;
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpGet("users")]
         public async Task<ActionResult<List<UserDTO>>> getUsers([FromQuery]PaginationDTO paginationDTO)
         {

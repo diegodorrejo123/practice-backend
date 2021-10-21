@@ -17,7 +17,6 @@ namespace BackEnd.Controllers
 {
     [Route("api/genres")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GenresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -43,6 +42,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("{Id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<GenreDTO>> Get(int Id)
         {
             var genre = await context.Genres.FindAsync(Id);
@@ -51,6 +51,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("all")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<GenreDTO>>> GetAll()
         {
             var genres = await context.Genres.ToListAsync();
@@ -67,6 +68,7 @@ namespace BackEnd.Controllers
             await context.SaveChangesAsync();
             return NoContent();
         }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpPut("{Id:int}")]
         public async Task<ActionResult> Put(int Id, [FromBody] GenreCreateDTO genreCreateDTO)
         {
@@ -76,6 +78,7 @@ namespace BackEnd.Controllers
             await context.SaveChangesAsync();
             return NoContent();
         }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "isAdmin")]
         [HttpDelete("{Id:int}")]
         public async Task<ActionResult> Delete(int Id)
         {
